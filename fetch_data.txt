@@ -1,0 +1,39 @@
+import requests
+import json
+import time
+
+MOONRAKER_URL = "http://ikshana.local:7125" 
+
+def fetch_live_data():
+    params = {
+        "gcode_move": "",
+        "toolhead": "",
+	"print_stats": "",
+	"motion_report": "",
+	"query_endstops": "",
+        "extruder": "",
+	"heater_bed": "",
+	"idle_timeout": "",
+	"system_stats": "",
+    }
+    url = f"{MOONRAKER_URL}/printer/objects/query"
+    try:
+        response = requests.get(url, params=params)
+        response.raise_for_status()  
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching live data: {e}")
+        return None
+
+def print_formatted_data(data):
+    formatted_data = json.dumps(data, indent=4)
+    print(formatted_data)
+
+print("Fetching live printer data every 0.2 seconds...")
+while True:
+    live_data = fetch_live_data()
+    if live_data:
+        print_formatted_data(live_data)
+    else:
+        print("No data received.")
+    time.sleep(0.1)
